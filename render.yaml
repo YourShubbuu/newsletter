@@ -5,6 +5,7 @@ services:
     plan: free
     buildCommand: pnpm install --no-frozen-lockfile && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
     startCommand: node packages/db/dist/migrate.js && node services/api/dist/main.js
+    initialDeployHook: node packages/db/dist/seed.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
