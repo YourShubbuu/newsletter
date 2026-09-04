@@ -7,6 +7,14 @@ import {
 } from "./schema";
 
 async function seed() {
+  console.log("Checking [NEWS BRAND NAME] seed state...");
+
+  const existingArticles = await db.select({ id: articles.id }).from(articles).limit(1);
+  if (existingArticles.length > 0) {
+    console.log("Seed skipped: articles already exist.");
+    process.exit(0);
+  }
+
   console.log("Seeding [NEWS BRAND NAME]...");
 
   const categoryData = [
@@ -15,9 +23,10 @@ async function seed() {
     ["sports", "Sports"], ["opinion", "Opinion"], ["data", "Data"]
   ] as const;
 
-  const categoryRows = await db.insert(categories).values(
+  await db.insert(categories).values(
     categoryData.map(([slug, name]) => ({ slug, name }))
-  ).onConflictDoNothing().returning();
+  ).onConflictDoNothing();
+  const categoryRows = await db.select().from(categories);
 
   const topicData = [
     ["artificial-intelligence", "Artificial Intelligence", "The technologies, companies and policy decisions shaping AI."],
@@ -25,16 +34,18 @@ async function seed() {
     ["future-of-work", "Future of Work", "How technology and economic change are reshaping work."]
   ] as const;
 
-  const topicRows = await db.insert(topics).values(
+  await db.insert(topics).values(
     topicData.map(([slug, name, description]) => ({ slug, name, description }))
-  ).onConflictDoNothing().returning();
+  ).onConflictDoNothing();
+  const topicRows = await db.select().from(topics);
 
   const tagData = ["AI", "Climate", "Policy", "Energy", "Startups", "Science", "Economy", "Cities"];
-  const tagRows = await db.insert(tags).values(
+  await db.insert(tags).values(
     tagData.map(name => ({ slug: name.toLowerCase().replaceAll(" ", "-"), name }))
-  ).onConflictDoNothing().returning();
+  ).onConflictDoNothing();
+  const tagRows = await db.select().from(tags);
 
-  const authorRows = await db.insert(authors).values([
+  const authorData = [
     {
       slug: "maya-sen", name: "Maya Sen",
       bio: "Technology correspondent covering artificial intelligence, platforms and the changing internet.",
@@ -50,7 +61,10 @@ async function seed() {
       bio: "Senior writer exploring the intersection of economics, culture and technology.",
       expertise: ["Economy", "Culture", "Technology"]
     }
-  ]).onConflictDoNothing().returning();
+  ] as const;
+
+  await db.insert(authors).values(authorData).onConflictDoNothing();
+  const authorRows = await db.select().from(authors);
 
   const articleRows = await db.insert(articles).values([
     {
@@ -91,34 +105,51 @@ async function seed() {
     }
   ]).returning();
 
-  if (authorRows[0] && categoryRows[0] && topicRows[0] && tagRows[0] && articleRows[0]) {
-    await db.insert(articleAuthors).values(articleRows.slice(0, 3).map((a, i) => ({
-      articleId: a.id, authorId: authorRows[i % authorRows.length]!.id
-    }))).onConflictDoNothing();
+  const categoryBySlug = new Map(categoryRows.map(row => [row.slug, row.id]));
+  const topicBySlug = new Map(topicRows.map(row => [row.slug, row.id]));
+  const tagBySlug = new Map(tagRows.map(row => [row.slug, row.id]));
+  const authorBySlug = new Map(authorRows.map(row => [row.slug, row.id]));
 
-    await db.insert(articleCategories).values(articleRows.slice(0, 3).map((a, i) => ({
-      articleId: a.id, categoryId: categoryRows[i % categoryRows.length]!.id
-    }))).onConflictDoNothing();
+  const first = articleRows[0];
+  const second = articleRows[1];
+  const third = articleRows[2];
 
-    await db.insert(articleTopics).values(articleRows.slice(0, 3).map((a, i) => ({
-      articleId: a.id, topicId: topicRows[i % topicRows.length]!.id
-    }))).onConflictDoNothing();
+  if (first && second && third) {
+    await db.insert(articleAuthors).values([
+      { articleId: first.id, authorId: authorBySlug.get("maya-sen")! },
+      { articleId: second.id, authorId: authorBySlug.get("daniel-okafor")! },
+      { articleId: third.id, authorId: authorBySlug.get("elena-martin")! },
+    ]).onConflictDoNothing();
 
-    await db.insert(articleTags).values(articleRows.slice(0, 3).map((a, i) => ({
-      articleId: a.id, tagId: tagRows[i % tagRows.length]!.id
-    }))).onConflictDoNothing();
+    await db.insert(articleCategories).values([
+      { articleId: first.id, categoryId: categoryBySlug.get("world")! },
+      { articleId: second.id, categoryId: categoryBySlug.get("business")! },
+      { articleId: third.id, categoryId: categoryBySlug.get("technology")! },
+    ]).onConflictDoNothing();
+
+    await db.insert(articleTopics).values([
+      { articleId: first.id, topicId: topicBySlug.get("artificial-intelligence")! },
+      { articleId: second.id, topicId: topicBySlug.get("climate-transition")! },
+      { articleId: third.id, topicId: topicBySlug.get("artificial-intelligence")! },
+    ]).onConflictDoNothing();
+
+    await db.insert(articleTags).values([
+      { articleId: first.id, tagId: tagBySlug.get("ai")! },
+      { articleId: second.id, tagId: tagBySlug.get("energy")! },
+      { articleId: third.id, tagId: tagBySlug.get("ai")! },
+    ]).onConflictDoNothing();
 
     await db.insert(articleBlocks).values([
       {
-        articleId: articleRows[0].id, type: "paragraph", position: 0,
+        articleId: first.id, type: "paragraph", position: 0,
         data: { text: "Across a growing number of cities, artificial intelligence is moving from pilot projects into the systems residents encounter every day." }
       },
       {
-        articleId: articleRows[0].id, type: "statistic", position: 1,
+        articleId: first.id, type: "statistic", position: 1,
         data: { value: "37%", label: "of surveyed city technology offices report active AI procurement programs", source: "Demo Civic Technology Survey, 2026" }
       },
       {
-        articleId: articleRows[0].id, type: "paragraph", position: 2,
+        articleId: first.id, type: "paragraph", position: 2,
         data: { text: "The central challenge is no longer whether the technology can be deployed, but whether residents can understand and challenge the decisions it helps produce." }
       }
     ]).onConflictDoNothing();
