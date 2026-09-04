@@ -31,6 +31,7 @@ export class ArticlesService {
     const slugBase = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 220) || "untitled-story";
     const slug = `${slugBase}-${Date.now().toString(36)}`;
     const [article] = await db.insert(schema.articles).values({ title, slug, kind: input.kind ?? "STANDARD", status: "DRAFT" }).returning();
+    if (!article) throw new BadRequestException("Article could not be created");
     await db.insert(schema.editorialWorkflows).values({ articleId: article.id, state: "DRAFT" });
     return this.get(article.id);
   }
