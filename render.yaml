@@ -2,7 +2,7 @@ services:
   - type: web
     name: news-api
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: corepack enable && pnpm install && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
     preDeployCommand: pnpm db:migrate
     startCommand: node services/api/dist/main.js
@@ -22,9 +22,10 @@ services:
   - type: web
     name: news-web
     runtime: node
-    plan: starter
+    plan: free
     buildCommand: corepack enable && pnpm install && pnpm --filter @news/web build
     startCommand: pnpm --filter @news/web start
+    healthCheckPath: /
     envVars:
       - key: NODE_ENV
         value: production
@@ -35,4 +36,4 @@ databases:
   - name: news-db
     databaseName: news
     user: news
-    plan: basic-256mb
+    plan: free
