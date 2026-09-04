@@ -4,11 +4,13 @@ services:
     runtime: node
     plan: free
     buildCommand: pnpm install && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
-    startCommand: pnpm db:migrate && node services/api/dist/main.js
+    startCommand: node packages/db/dist/migrate.js && node services/api/dist/main.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.23.2
       - key: ALLOW_DEV_AUTH
         value: "false"
       - key: DATABASE_URL
@@ -28,6 +30,8 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: NODE_VERSION
+        value: 22.23.2
       - key: NEXT_PUBLIC_API_URL
         sync: false
 
