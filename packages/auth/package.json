@@ -11,5 +11,8 @@
   "dependencies": {
     "@news/db": "workspace:*",
     "drizzle-orm": "^0.44.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0"
   }
 }
