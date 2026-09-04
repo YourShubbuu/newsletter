@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { ReaderHeader } from '@/components/reader-shell';
 import { FrontInteractive } from './front-interactive';
 
