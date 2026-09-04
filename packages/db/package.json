@@ -2,14 +2,17 @@
   "name": "@news/db",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
+    "build": "tsc -p tsconfig.json",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx src/seed.ts",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "dotenv": "^17.2.2",
     "drizzle-orm": "^0.44.5",
     "postgres": "^3.4.7"
   },
