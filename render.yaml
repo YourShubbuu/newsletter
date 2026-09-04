@@ -1,0 +1,36 @@
+services:
+  - type: web
+    name: news-api
+    runtime: node
+    rootDir: /
+    buildCommand: corepack enable && pnpm install && pnpm --filter @news/api build
+    startCommand: node services/api/dist/main.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ALLOW_DEV_AUTH
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: news-db
+          property: connectionString
+      - key: WEB_ORIGIN
+        sync: false
+
+  - type: web
+    name: news-web
+    runtime: node
+    rootDir: /
+    buildCommand: corepack enable && pnpm install && pnpm --filter @news/web build
+    startCommand: pnpm --filter @news/web start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+
+databases:
+  - name: news-db
+    databaseName: news
+    user: news
