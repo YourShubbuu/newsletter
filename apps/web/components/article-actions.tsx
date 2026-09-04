@@ -1,10 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-export function ArticleActions({ slug: _slug }: { slug: string }) {
+export function ArticleActions({ slug }: { slug: string }) {
+  const storageKey = `news:saved:${slug}`;
   const [saved, setSaved] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    try {
+      setSaved(window.localStorage.getItem(storageKey) === '1');
+    } catch {
+      // Storage can be unavailable in private or restricted browser contexts.
+    }
+  }, [storageKey]);
+
+  function toggleSaved() {
+    setSaved(current => {
+      const next = !current;
+      try {
+        if (next) window.localStorage.setItem(storageKey, '1');
+        else window.localStorage.removeItem(storageKey);
+      } catch {
+        // Keep the UI usable even when persistent browser storage is unavailable.
+      }
+      return next;
+    });
+  }
 
   async function share() {
     try {
@@ -24,8 +46,8 @@ export function ArticleActions({ slug: _slug }: { slug: string }) {
 
   return (
     <div className="article-actions" aria-label="Article actions">
-      <button type="button" onClick={() => setSaved(v => !v)} aria-pressed={saved}>
-        {saved ? 'Saved' : 'Save'}
+      <button type="button" onClick={toggleSaved} aria-pressed={saved}>
+        {saved ? 'Saved on this device' : 'Save on this device'}
       </button>
       <button type="button" onClick={share}>{copied ? 'Link copied' : 'Share'}</button>
     </div>
