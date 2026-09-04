@@ -1,0 +1,19 @@
+{
+  "name": "news-platform",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel --filter @news/web --filter @news/api dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @news/db db:generate",
+    "db:migrate": "pnpm --filter @news/db db:migrate",
+    "db:seed": "pnpm --filter @news/db db:seed",
+    "db:studio": "pnpm --filter @news/db db:studio"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}
