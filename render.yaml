@@ -2,8 +2,9 @@ services:
   - type: web
     name: news-api
     runtime: node
-    rootDir: /
-    buildCommand: corepack enable && pnpm install && pnpm --filter @news/api build
+    plan: starter
+    buildCommand: corepack enable && pnpm install && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
+    preDeployCommand: pnpm db:migrate
     startCommand: node services/api/dist/main.js
     healthCheckPath: /health
     envVars:
@@ -21,7 +22,7 @@ services:
   - type: web
     name: news-web
     runtime: node
-    rootDir: /
+    plan: starter
     buildCommand: corepack enable && pnpm install && pnpm --filter @news/web build
     startCommand: pnpm --filter @news/web start
     envVars:
@@ -34,3 +35,4 @@ databases:
   - name: news-db
     databaseName: news
     user: news
+    plan: basic-256mb
