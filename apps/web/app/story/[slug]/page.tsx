@@ -1,8 +1,13 @@
 import { notFound } from 'next/navigation';
 
+function getApiBase() {
+  const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, '');
+  if (configured) return configured.endsWith('/api') ? configured : `${configured}/api`;
+  return 'http://localhost:4000/api';
+}
+
 async function getArticle(slug:string) {
-  const api = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-  const res = await fetch(`${api}/public/articles/${encodeURIComponent(slug)}`, { next:{ revalidate:30 } });
+  const res = await fetch(`${getApiBase()}/public/articles/${encodeURIComponent(slug)}`, { next:{ revalidate:30 } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error('Failed to load story');
   return res.json();
