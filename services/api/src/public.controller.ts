@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, NotFoundException } from '@nestjs/common';
 import { asc, desc, eq, ilike, or } from 'drizzle-orm';
 import { db, schema } from '@news/db';
 
@@ -15,12 +15,10 @@ export class PublicController {
 
   @Get('articles/:slug')
   async article(@Param('slug') slug: string) {
-    const [article] = await db.select().from(schema.articles)
-      .where(eq(schema.articles.slug, slug)).limit(1);
-    if (!article || article.status !== 'PUBLISHED') return null;
+    const [article] = await db.select().from(schema.articles).where(eq(schema.articles.slug, slug)).limit(1);
+    if (!article || article.status !== 'PUBLISHED') throw new NotFoundException('Story not found');
     const blocks = await db.select().from(schema.articleBlocks)
-      .where(eq(schema.articleBlocks.articleId, article.id))
-      .orderBy(asc(schema.articleBlocks.position));
+      .where(eq(schema.articleBlocks.articleId, article.id)).orderBy(asc(schema.articleBlocks.position));
     return { article, blocks };
   }
 
