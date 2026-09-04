@@ -1,23 +1,14 @@
 'use client';
-
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
 const sections = ['LIVE', 'WORLD', 'BUSINESS', 'TECHNOLOGY', 'SCIENCE', 'CULTURE'];
 function apiBase() { const value = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, ''); return value ? (value.endsWith('/api') ? value : `${value}/api`) : 'http://localhost:4000/api'; }
 type User = { id: string; email: string; displayName: string };
-
 export function ReaderHeader() {
-  const pathname = usePathname(); const router = useRouter();
-  const [open, setOpen] = useState(false); const [query, setQuery] = useState(''); const [user, setUser] = useState<User | null>(null);
+  const pathname = usePathname(); const router = useRouter(); const [open, setOpen] = useState(false); const [query, setQuery] = useState(''); const [user, setUser] = useState<User | null>(null);
   useEffect(() => { fetch(`${apiBase()}/auth/me`, { credentials: 'include' }).then(r => r.ok ? r.json() : null).then(data => setUser(data?.user ?? null)).catch(() => setUser(null)); }, [pathname]);
   async function logout() { await fetch(`${apiBase()}/auth/logout`, { method: 'POST', credentials: 'include' }).catch(() => undefined); setUser(null); router.refresh(); }
   function submitSearch(e: React.FormEvent) { e.preventDefault(); const value = query.trim(); router.push(value ? `/search?q=${encodeURIComponent(value)}` : '/search'); setOpen(false); }
-  return <header className="reader-header">
-    <Link className="brand" href="/" aria-label="Home">[NEWS BRAND NAME]</Link>
-    <nav className="section-nav" aria-label="Sections">{sections.map(section => <Link key={section} className={pathname === `/section/${section.toLowerCase()}` ? 'active' : ''} href={`/section/${section.toLowerCase()}`}>{section}</Link>)}<Link className={pathname === '/global' ? 'active' : ''} href="/global">GLOBAL WIRE</Link></nav>
-    <div className="reader-header-actions"><button className="search-toggle" type="button" onClick={() => setOpen(v => !v)} aria-expanded={open}>Search</button>{user ? <><Link className="account-link" href="/account">{user.displayName}</Link><button className="account-link" onClick={logout}>Log out</button></> : <Link className="account-link" href="/account">Sign in</Link>}</div>
-    {open && <form id="site-search" className="search-popover" onSubmit={submitSearch}><label htmlFor="site-search-input">Search stories</label><input id="site-search-input" autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search stories, topics, authors…" /></form>}
-  </header>;
+  return <><header className="reader-header"><Link className="brand" href="/" aria-label="Home">[NEWS BRAND NAME]</Link><nav className="section-nav" aria-label="Sections">{sections.map(section => <Link key={section} className={pathname === `/section/${section.toLowerCase()}` ? 'active' : ''} href={`/section/${section.toLowerCase()}`}>{section}</Link>)}<Link className={pathname === '/global' ? 'active' : ''} href="/global">GLOBAL WIRE</Link></nav><div className="reader-header-actions"><button className="search-toggle" type="button" onClick={() => setOpen(v => !v)} aria-expanded={open}>Search</button>{user ? <><Link className="account-link" href="/account">{user.displayName}</Link><button className="account-link" onClick={logout}>Log out</button></> : <Link className="account-link" href="/account">Sign in</Link>}</div>{open && <form id="site-search" className="search-popover" onSubmit={submitSearch}><label htmlFor="site-search-input">Search stories</label><input id="site-search-input" autoFocus value={query} onChange={e => setQuery(e.target.value)} placeholder="Search stories, topics, authors…" /></form>}</header><style>{`.reader-header-actions{display:flex;align-items:center;gap:8px}.account-link{border:0;background:transparent;color:var(--foreground);text-decoration:none;padding:9px 10px;cursor:pointer;font:10px ui-monospace,monospace;text-transform:uppercase;letter-spacing:.08em}.account-link:hover{border-bottom:1px solid var(--foreground)}@media(max-width:800px){.reader-header-actions{grid-column:2;grid-row:1}.section-nav{grid-column:1/-1;grid-row:2}}`}</style></>;
 }
