@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 
 type Block = { id?: string; type: "paragraph" | "heading" | "quote"; data: { text: string } };
 type Article = { id: string; title: string; subtitle: string | null; status: string; kind: string };
-const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "development" ? "http://localhost:4000/api" : "");
+
+if (process.env.NODE_ENV === "production" && !API) {
+  throw new Error("NEXT_PUBLIC_API_URL must be configured in production");
+}
 
 export default function EditorPage() {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -34,6 +39,7 @@ export default function EditorPage() {
   return <main className="editor-app">
     <aside className="editor-sidebar">
       <div className="sidebar-brand">NEWSROOM</div>
+      <input className="compact-input" value={devEmail} onChange={(e) => setDevEmail(e.target.value)} aria-label="Development email" />
       <button className="button compact" onClick={signIn}>Dev sign-in</button>
       <button className="button secondary compact" onClick={createArticle}>+ New story</button>
       <div className="story-list">{articles.map((item) => <button key={item.id} className={`story-item ${article?.id === item.id ? "active" : ""}`} onClick={() => openArticle(item.id)}><strong>{item.title}</strong><span>{item.status}</span></button>)}</div>
