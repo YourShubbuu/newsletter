@@ -5,10 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 type Block = { id?: string; type: "paragraph" | "heading" | "quote"; data: { text: string } };
 type Article = { id: string; title: string; subtitle: string | null; status: string; kind: string };
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? (process.env.NODE_ENV === "development" ? "http://localhost:4000/api" : "");
-
-if (process.env.NODE_ENV === "production" && !API) {
-  throw new Error("NEXT_PUBLIC_API_URL must be configured in production");
+function getApiBase() {
+  const configured = process.env.NEXT_PUBLIC_API_URL?.replace(/\/+$/, "");
+  if (configured) return configured.endsWith("/api") ? configured : `${configured}/api`;
+  if (process.env.NODE_ENV === "development") return "http://localhost:4000/api";
+  return "";
 }
 
 export default function EditorPage() {
@@ -19,7 +20,9 @@ export default function EditorPage() {
   const [devEmail, setDevEmail] = useState("editor@news.local");
 
   async function call(path: string, init?: RequestInit) {
-    const res = await fetch(`${API}${path}`, { ...init, credentials: "include", headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
+    const api = getApiBase();
+    if (!api) throw new Error("NEXT_PUBLIC_API_URL is not configured");
+    const res = await fetch(`${api}${path}`, { ...init, credentials: "include", headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) } });
     if (!res.ok) throw new Error(await res.text());
     return res.json();
   }
