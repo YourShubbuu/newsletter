@@ -1,14 +1,13 @@
 import "dotenv/config";
 import { readFile, readdir } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join } from "node:path";
 import postgres from "postgres";
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error("DATABASE_URL is required for migrations");
 
 const sql = postgres(databaseUrl, { max: 1, prepare: false });
-const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), "../drizzle");
+const migrationsDir = join(__dirname, "../drizzle");
 
 async function migrate() {
   await sql.unsafe(`
