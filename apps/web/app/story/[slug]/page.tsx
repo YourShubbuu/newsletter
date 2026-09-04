@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import { ReaderHeader } from '@/components/reader-shell';
 import { ArticleActions } from '@/components/article-actions';
 import { ReadingProgress } from '@/components/reading-progress';
 
@@ -32,7 +33,7 @@ export default async function StoryPage({ params }: { params: Promise<{ slug: st
   const result = await getArticle(slug);
   if (!result) notFound();
   const { article, blocks } = result;
-  return <><ReadingProgress /><main className="story-page"><article>
+  return <><ReaderHeader /><ReadingProgress /><main className="story-page"><article>
     <div className="story-kicker">{article.kind || 'STORY'}</div>
     <h1>{article.title}</h1>
     {article.subtitle && <p className="story-deck">{article.subtitle}</p>}
