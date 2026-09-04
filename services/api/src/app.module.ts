@@ -3,6 +3,7 @@ import { AuthController } from "./auth/auth.controller";
 import { AuthServiceImpl } from "./auth/auth.service";
 import { ArticlesController } from "./articles/articles.controller";
 import { ArticlesService } from "./articles/articles.service";
+import { PublicController } from "./public.controller";
 
 @Controller()
 class HealthController {
@@ -10,5 +11,5 @@ class HealthController {
   @Get("/ready") ready() { return { status: "ready" }; }
 }
 
-@Module({ controllers: [HealthController, AuthController, ArticlesController], providers: [AuthServiceImpl, ArticlesService] })
+@Module({ controllers: [HealthController, AuthController, ArticlesController, PublicController], providers: [AuthServiceImpl, ArticlesService] })
 export class AppModule {}
