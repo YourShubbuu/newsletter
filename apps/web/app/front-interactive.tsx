@@ -1,70 +1,13 @@
 'use client';
-
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-
-type Story = {
-  id: string;
-  slug: string;
-  title: string;
-  subtitle?: string | null;
-  publishedAt?: string | null;
-  kind?: string | null;
-};
-
-export function FrontInteractive({ stories }: { stories: Story[] }) {
-  const [mode, setMode] = useState<'all' | 'short'>('all');
-  const visible = useMemo(
-    () => mode === 'short' ? stories.filter(s => s.kind === 'BRIEF') : stories,
-    [mode, stories],
-  );
-  const [lead, ...side] = visible;
-
-  return (
-    <main className="front-page">
-      <div className="front-toolbar">
-        <span>• DEVELOPING / THE LIVE EDITION</span>
-        <div>
-          <button className={mode === 'all' ? 'active' : ''} onClick={() => setMode('all')}>ALL STORIES</button>
-          <button className={mode === 'short' ? 'active' : ''} onClick={() => setMode('short')}>QUICK READS</button>
-        </div>
-      </div>
-
-      {lead ? (
-        <section className="hero-grid">
-          <article className="lead-story">
-            <Link href={`/story/${lead.slug}`}>
-              <p className="eyebrow">{lead.kind || 'MAJOR STORY'}</p>
-              <h1>{lead.title}</h1>
-              {lead.subtitle && <p>{lead.subtitle}</p>}
-              <small>{lead.publishedAt ? new Date(lead.publishedAt).toLocaleString() : 'PUBLISHED'}</small>
-            </Link>
-          </article>
-          <aside className="side-stories">
-            {side.slice(0, 3).map(story => (
-              <Link key={story.id} href={`/story/${story.slug}`}>
-                <span className="eyebrow">{story.kind || 'STORY'}</span>
-                <h2>{story.title}</h2>
-                <small>{story.publishedAt ? new Date(story.publishedAt).toLocaleString() : 'PUBLISHED'}</small>
-              </Link>
-            ))}
-          </aside>
-        </section>
-      ) : (
-        <div className="empty-editorial-state">
-          <strong>{mode === 'short' ? 'No quick reads yet.' : 'No published stories yet.'}</strong>
-          <span>
-            {mode === 'short'
-              ? 'Quick Reads will appear when the editorial desk publishes a brief.'
-              : 'The front page will populate automatically when the editorial desk publishes its first story.'}
-          </span>
-        </div>
-      )}
-
-      <section className="front-actions">
-        <Link href="/reader">Open the live desk →</Link>
-        <Link href="/search">Search the archive →</Link>
-      </section>
-    </main>
-  );
+type Story = { id: string; slug: string; title: string; subtitle?: string | null; publishedAt?: string | null; kind?: string | null };
+type Wire = { title: string; url: string; domain?: string; sourcecountry?: string; seendate?: string };
+export function FrontInteractive({ stories, wire }: { stories: Story[]; wire: Wire[] }) {
+  const [mode, setMode] = useState<'all' | 'short'>('all'); const visible = useMemo(() => mode === 'short' ? stories.filter(s => s.kind === 'BRIEF') : stories, [mode, stories]); const [lead, ...side] = visible;
+  return <main className="front-page"><div className="front-toolbar"><span>• DEVELOPING / THE LIVE EDITION</span><div><button className={mode === 'all' ? 'active' : ''} onClick={() => setMode('all')}>ALL STORIES</button><button className={mode === 'short' ? 'active' : ''} onClick={() => setMode('short')}>QUICK READS</button></div></div>
+    {lead ? <section className="hero-grid"><article className="lead-story"><Link href={`/story/${lead.slug}`}><p className="eyebrow">{lead.kind || 'MAJOR STORY'}</p><h1>{lead.title}</h1>{lead.subtitle && <p>{lead.subtitle}</p>}<small>{lead.publishedAt ? new Date(lead.publishedAt).toLocaleString() : 'PUBLISHED'}</small></Link></article><aside className="side-stories">{side.slice(0, 3).map(story => <Link key={story.id} href={`/story/${story.slug}`}><span className="eyebrow">{story.kind || 'STORY'}</span><h2>{story.title}</h2><small>{story.publishedAt ? new Date(story.publishedAt).toLocaleString() : 'PUBLISHED'}</small></Link>)}</aside></section> : <div className="empty-editorial-state"><strong>{mode === 'short' ? 'No quick reads yet.' : 'The newsroom is ready.'}</strong><span>{mode === 'short' ? 'Quick Reads appear when the editorial desk publishes a brief.' : 'Our live global wire is below while the editorial desk builds original coverage.'}</span></div>}
+    <section className="front-wire"><div className="wire-head"><p className="eyebrow">GLOBAL WIRE / LIVE</p><Link href="/global">Open full wire →</Link></div><div className="front-wire-grid">{wire.slice(0, 8).map((item, i) => <article key={`${item.url}-${i}`}><span>{item.domain || 'WORLD'}{item.sourcecountry ? ` · ${item.sourcecountry}` : ''}</span><a href={item.url} target="_blank" rel="noreferrer">{item.title}</a><time>{item.seendate ? new Date(item.seendate).toLocaleString() : 'Latest'}</time></article>)}</div>{!wire.length && <p className="wire-muted">Global wire unavailable right now. Original newsroom coverage remains available above.</p>}</section>
+    <section className="front-actions"><Link href="/reader">Open the live desk →</Link><Link href="/search">Search the archive →</Link><Link href="/account">Your edition →</Link></section>
+  </main>;
 }
