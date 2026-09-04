@@ -3,7 +3,7 @@ services:
     name: news-api
     runtime: node
     plan: free
-    buildCommand: corepack enable && pnpm install && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
+    buildCommand: pnpm install && pnpm --filter @news/db build && pnpm --filter @news/auth build && pnpm --filter @news/api build
     startCommand: pnpm db:migrate && node services/api/dist/main.js
     healthCheckPath: /health
     envVars:
@@ -22,7 +22,7 @@ services:
     name: news-web
     runtime: node
     plan: free
-    buildCommand: corepack enable && pnpm install && pnpm --filter @news/web build
+    buildCommand: pnpm install && pnpm --filter @news/web build
     startCommand: pnpm --filter @news/web start
     healthCheckPath: /
     envVars:
