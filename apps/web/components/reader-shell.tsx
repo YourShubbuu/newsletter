@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 const sections = ['LIVE', 'WORLD', 'BUSINESS', 'TECHNOLOGY', 'SCIENCE', 'CULTURE'];
@@ -9,9 +9,8 @@ const sections = ['LIVE', 'WORLD', 'BUSINESS', 'TECHNOLOGY', 'SCIENCE', 'CULTURE
 export function ReaderHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [open, setOpen] = useState(false);
-  const [query, setQuery] = useState(searchParams.get('q') ?? '');
+  const [query, setQuery] = useState('');
 
   function submitSearch(e: React.FormEvent) {
     e.preventDefault();
